@@ -42,9 +42,9 @@ static const uint8_t num_0_5x8[]={0x3E,0x51,0x49,0x45,0x3E};
 static const uint8_t colon_5x8[]={0x00,0x36,0x36,0x00,0x00};
 static const uint8_t hyphen_5x8[]={0x00,0x08,0x08,0x08,0x00};
 
-uint8_t Display_Menu(void);
-uint8_t Display_Menu_1_1(void);
-uint8_t Display_Menu_1_2(void);
-uint8_t Display_Menu_1_3(void);
+uint8_t Display_Menu_1(void);
 uint8_t Display_Menu_2_1(void);
 uint8_t Display_Menu_2_2(void);
+uint8_t Display_Menu_2_3(void);
+uint8_t Display_Menu_3_1(void);
+uint8_t Display_Menu_3_2(void);

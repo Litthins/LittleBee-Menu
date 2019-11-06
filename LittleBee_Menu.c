@@ -1,310 +1,107 @@
 #include "LittleBee_Menu.h"
 
-uint16_t menustate;
-uint8_t enter,next,prev,exit;
-uint8_t display_on;
+uint16_t level_1,level_2,level_3=0;
+uint8_t enter,next,prev,exit=0;
+uint8_t display_on=0;
 
-uint8_t Display_Menu()
+uint8_t Display_Menu_1()
 {
-	if(((menustate&0x01)==0)&&(enter==1))//初始默认选中一级菜单1
+	if(enter==1)//初始默认选中一级菜单1
 	{
 		exit=0;
 		enter=0;
 		display_on=1;
-		menustate=0x0003;//(0011)
+		level_1=1;
 	}
-	if((menustate==0x0003)&&(prev==1))//一级菜单1向上到一级菜单3
+	if((level_1==1)&&(prev==1))//一级菜单1向上到一级菜单3
 	{
 		prev=0;
 		display_on=1;
-		menustate=0x0007;//(0111)
+		level_1=3;
 	}
-	if((menustate==0x0003)&&(next==1))//一级菜单1向下到一级菜单2
+	if((level_1==1)&&(next==1))//一级菜单1向下到一级菜单2
 	{
 		next=0;
 		display_on=1;
-		menustate=0x0005;//(0101)
+		level_1=2
 	}
-	if((menustate==0x0003)&&(enter==1))//进入一级菜单1
+	if((level_1==1)&&(enter==1))//进入一级菜单1
 	{
 		enter=0;
 		display_on=1;
 		//添加二级菜单标志
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
+		level_2=1;
 		//调用二级菜单
-		Display_Menu_1_1();
+		Display_Menu_2_1();
 	}
-	if((menustate==0x0005)&&(prev==1))//一级菜单2向上到一级菜单1
+	if((level_1==2)&&(prev==1))//一级菜单2向上到一级菜单1
 	{
 		prev=0;
 		display_on=1;
-		menustate=0x0003;
+		level_1=1;
 	}
-	if((menustate==0x0005)&&(next==1))//一级菜单2向下到一级菜单3
+	if((level_1==2)&&(next==1))//一级菜单2向下到一级菜单3
 	{
 		next=0;
 		display_on=1;
-		menustate=0x0007;
+		level_1=3;
 	}
-	if((menustate==0x0005)&&(enter==1))//进入一级菜单2
+	if((level_1==2)&&(enter==1))//进入一级菜单2
 	{
 		enter=0;
 		display_on=1;
 		//添加二级菜单标志
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
+		level_2=1;
 		//调用二级菜单
-		Display_Menu_1_2();
+		Display_Menu_2_2();
 	}
-	if((menustate==0x0007)&&(prev==1))//一级菜单3向上到一级菜单2
+	if((level_1==3)&&(prev==1))//一级菜单3向上到一级菜单2
 	{
 		prev=0;
 		display_on=1;
-		menustate=0x0005;
+		level_1=2;
 	}
-	if((menustate==0x0007)&&(next==1))//一级菜单3向下到一级菜单1
+	if((level_1==3)&&(next==1))//一级菜单3向下到一级菜单1
 	{
 		next=0;
 		display_on=1;
-		menustate=0x0003;
+		level_1=1;
 	}
-	if((menustate==0x0007)&&(enter==1))//进入一级菜单3
+	if((level_1==3)&&(enter==1))//进入一级菜单3
 	{
 		enter=0;
 		display_on=1;
 		//添加二级菜单标志
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
+		level_2=1;
 		//调用二级菜单
-		Display_Menu_1_3();
+		Display_Menu_2_3();
 	}
 	//一级菜单切换逻辑结束
-	if(((menustate==0x0003)||(menustate==0x0005)||(menustate==0x0007))&&(exit==1))
+	if(((level_1==1)||(level_1==2)||(level_1==3))&&(exit==1))
 	{
 		exit=0;
 		display_on=1;
-		menustate=0x0000;
+		level_1=0;
 	}//由一级菜单回到桌面
 	
 
-	if(((menustate&0x0001)==1)&&(((menustate&0x0010)>>4)==0)&&(display_on==1))//一级菜单激活，二级菜单未激活
+	if((display_on==1))//一级菜单激活，二级菜单未激活
 	{
-	if(((menustate&0x000e)>>1)==1)//一级菜单第一项选中
+	if(level_1==1)//一级菜单第一项选中
 	{
 		if(display_on==1)
 		{
 			display_on=0;//清空刷新标志
 		}
 	}
-	if(((menustate&0x000e)>>1)==2)//一级菜单第二项选中
+	if(level_1==2)//一级菜单第二项选中
 	{
 		if(display_on==1)
 		{
 			display_on=0;
 		}
 	}
-	if(((menustate&0x000e)>>1)==3)//一级菜单第三项选中
-	{
-		if(display_on==1)
-		{
-			display_on=0;
-		}
-	}
-	}
-	return 0;
-}
-
-uint8_t Display_Menu_1_1()
-{
-	while(1)
-	{
-	if((((menustate&0x0060)>>5)==1)&&(enter==1))//菜单1-1确认
-	{
-		display_on=1;
-		enter=0;
-		menustate=menustate&0x000f;
-		break;
-	}
-	if((((menustate&0x0060)>>5)==2)&&(enter==1))//菜单1-2确认
-	{
-		display_on=1;
-		enter=0;
-		menustate=menustate&0x000f;
-		break;
-	}
-	if((((menustate&0x0060)>>5)==3)&&(enter==1))//菜单1-3确认
-	{
-		display_on=1;
-		enter=0;
-		menustate=menustate&0x000f;
-		break;
-	}
-	if((((menustate&0x0010)>>4)==1)&&(exit==1))//菜单1返回
-	{
-		display_on=1;
-		exit=0;
-		menustate=menustate&0x000f;
-		break;
-	}
-	if((((menustate&0x0060)>>5)==1)&&(next==1))//菜单1-1到1-2
-	{
-		display_on=1;
-		next=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0050;
-	}
-	if((((menustate&0x0060)>>5)==1)&&(prev==1))//菜单1-1到1-3
-	{
-		display_on=1;
-		prev=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0070;
-	}
-	if((((menustate&0x0060)>>5)==2)&&(next==1))//菜单1-2到1-3
-	{
-		display_on=1;
-		next=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0070;
-	}
-	if((((menustate&0x0060)>>5)==2)&&(prev==1))//菜单1-2到1-1
-	{
-		display_on=1;
-		prev=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
-	}
-	if((((menustate&0x0060)>>5)==3)&&(next==1))//菜单1-3到1-1
-	{
-		display_on=1;
-		next=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
-	}
-	if((((menustate&0x0060)>>5)==3)&&(prev==1))//菜单1-3到1-2
-	{
-		display_on=1;
-		prev=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0050;
-	}
-	if(((menustate&0x0060)>>5)==1)//菜单1-1显示
-	{
-		if(display_on==1)
-		{
-		display_on=0;
-		}
-	}
-	if(((menustate&0x0060)>>5)==2)//菜单1-2显示
-	{
-		if(display_on==1)
-		{
-		display_on=0;
-		}
-	}
-	if(((menustate&0x0060)>>5)==3)//菜单1-3显示
-	{
-		if(display_on==1)
-		{
-		display_on=0;
-		}
-	}
-	}
-	return 0;
-}
-
-uint8_t Display_Menu_1_2()
-{
-	while(1)
-	{
-	if((((menustate&0x0060)>>5)==1)&&(enter==1))//菜单2-1确认
-	{
-		display_on=1;
-		enter=0;
-		menustate=menustate&0x007f;
-		menustate=menustate|0x0180;
-		Display_Menu_2_1();
-	}
-	if((((menustate&0x0060)>>5)==2)&&(enter==1))//菜单2-2确认
-	{
-		display_on=1;
-		enter=0;
-		menustate=menustate&0x007f;
-		menustate=menustate|0x0180;
-		Display_Menu_2_2();
-	}
-	if((((menustate&0x0060)>>5)==3)&&(enter==1))//菜单2-3确认
-	{
-		display_on=1;
-		enter=0;
-		menustate=menustate&0x000f;
-		break;
-	}
-	if((((menustate&0x0010)>>4)==1)&&(exit==1))//菜单2返回
-	{
-		display_on=1;
-		exit=0;
-		menustate=menustate&0x000f;
-		break;
-	}
-	if((((menustate&0x0060)>>5)==1)&&(next==1))//菜单2-1到2-2
-	{
-		display_on=1;
-		next=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0050;
-	}
-	if((((menustate&0x0060)>>5)==1)&&(prev==1))//菜单2-1到2-3
-	{
-		display_on=1;
-		prev=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0070;
-	}
-	if((((menustate&0x0060)>>5)==2)&&(next==1))//菜单2-2到2-3
-	{
-		display_on=1;
-		next=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0070;
-	}
-	if((((menustate&0x0060)>>5)==2)&&(prev==1))//菜单2-2到2-1
-	{
-		display_on=1;
-		prev=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
-	}
-	if((((menustate&0x0060)>>5)==3)&&(next==1))//菜单2-3到2-1
-	{
-		display_on=1;
-		next=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0030;
-	}
-	if((((menustate&0x0060)>>5)==3)&&(prev==1))//菜单2-3到2-2
-	{
-		display_on=1;
-		prev=0;
-		menustate=menustate&0x000f;
-		menustate=menustate|0x0050;
-	}
-	if(((menustate&0x0060)>>5)==1)//菜单2-1选中
-	{
-		if(display_on==1)
-		{
-			display_on=0;
-		}
-	}
-	if(((menustate&0x0060)>>5)==2)//菜单2-2选中
-	{
-		if(display_on==1)
-		{
-			display_on=0;
-		}
-	}
-	if(((menustate&0x0060)>>5)==3)//菜单2-3选中
+	if(level_1==3)//一级菜单第三项选中
 	{
 		if(display_on==1)
 		{
@@ -319,96 +116,89 @@ uint8_t Display_Menu_2_1()
 {
 	while(1)
 	{
-	if((((menustate&0x0f00)>>8)==1)&&(enter==1))//选项2-1-1确认
+	if((level_2==1)&&(enter==1))//菜单2-1确认
 	{
 		display_on=1;
 		enter=0;
-		menustate=menustate&0x007f;
+		level_2=0;
 		break;
 	}
-	if((((menustate&0x0f00)>>8)==2)&&(enter==1))//选项2-1-2确认
+	if((level_2==2)&&(enter==1))//菜单2-2确认
 	{
 		display_on=1;
 		enter=0;
-		menustate=menustate&0x007f;
+		level_2=0;
 		break;
 	}
-	if((((menustate&0x0f00)>>8)==3)&&(enter==1))//选项2-1-3确认
+	if((level_2==3)&&(enter==1))//菜单2-3确认
 	{
 		display_on=1;
 		enter=0;
-		menustate=menustate&0x007f;
+		level_2=0;
 		break;
 	}
-	if((((menustate&0x0080)>>7)==1)&&(exit==1))//选项2-1返回
+	if((level_2==1)&&(exit==1))//菜单2-1返回
 	{
 		display_on=1;
 		exit=0;
-		menustate=menustate&0x007f;
+		level_2=0;
 		break;
 	}
-	if((((menustate&0x0f00)>>8)==1)&&(next==1))//选项2-1-1到2-1-2
+	if((level_2==1)&&(next==1))//菜单2-1到2-2
 	{
 		display_on=1;
 		next=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0200;
+		level_2=2;
 	}
-	if((((menustate&0x0f00)>>8)==1)&&(prev==1))//选项2-1-1到2-1-3
+	if((level_2==1)&&(prev==1))//菜单2-1到2-3
 	{
 		display_on=1;
 		prev=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0300;
+		level_2=3;
 	}
-	if((((menustate&0x0f00)>>8)==2)&&(next==1))//选项2-1-2到2-1-3
+	if((level_2==2)&&(next==1))//菜单2-2到2-3
 	{
 		display_on=1;
 		next=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0300;
+		level_2=3;
 	}
-	if((((menustate&0x0f00)>>8)==2)&&(prev==1))//选项2-1-2到2-1-1
+	if((level_2==2)&&(prev==1))//菜单2-2到2-1
 	{
 		display_on=1;
 		prev=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0100;
+		level_2=1;
 	}
-	if((((menustate&0x0f00)>>8)==3)&&(next==1))//选项2-1-3到2-1-1
+	if((level_2==3)&&(next==1))//菜单2-3到2-1
 	{
 		display_on=1;
 		next=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0100;
+		level_2=1;
 	}
-	if((((menustate&0x0f00)>>8)==3)&&(prev==1))//选项2-1-3到2-1-2
+	if((level_2==3)&&(prev==1))//菜单2-3到2-2
 	{
 		display_on=1;
 		prev=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0200;
+		level_2=2;
 	}
-	if(((menustate&0x0f00)>>8)==1)//选项2-1-1
+	if(level_2==1)//菜单2-1显示
 	{
 		if(display_on==1)
 		{
-			display_on=0;
+		display_on=0;
 		}
 	}
-	if(((menustate&0x0f00)>>8)==2)//选项2-1-2
+	if(level_2==2)//菜单2-2显示
 	{
 		if(display_on==1)
 		{
-			display_on=0;
-			}
-		
+		display_on=0;
+		}
 	}
-	if(((menustate&0x0f00)>>8)==3)//选项2-1-3
+	if(level_2==3)//菜单2-3显示
 	{
 		if(display_on==1)
 		{
-			display_on=0;
+		display_on=0;
 		}
 	}
 	}
@@ -419,91 +209,273 @@ uint8_t Display_Menu_2_2()
 {
 	while(1)
 	{
-	if((((menustate&0x0f00)>>8)==1)&&(enter==1))//选项2-2-1确认
+	if((level_2==1)&&(enter==1))//菜单2-2选项1确认
 	{
 		display_on=1;
 		enter=0;
-		menustate=menustate&0x007f;
-		break;
+		level_3=1;
+		Display_Menu_3_1();
 	}
-	if((((menustate&0x0f00)>>8)==2)&&(enter==1))//选项2-2-2确认
+	if((level_2==2)&&(enter==1))//菜单2-2选项2确认
 	{
 		display_on=1;
 		enter=0;
-		menustate=menustate&0x007f;
-		break;
+		level_3=1;
+		Display_Menu_3_2();
 	}
-	if((((menustate&0x0f00)>>8)==3)&&(enter==1))//选项2-2-3确认
+	if((level_2==3)&&(enter==1))//菜单2-2选项3确认
 	{
 		display_on=1;
 		enter=0;
-		menustate=menustate&0x007f;
+		level_2=0;
 		break;
 	}
-	if((((menustate&0x0080)>>7)==1)&&(exit==1))//选项2-2返回
+	if(((level_2==1)||(level_2==2)||(level_2==3))&&(exit==1))//菜单2-2返回
 	{
 		display_on=1;
 		exit=0;
-		menustate=menustate&0x007f;
+		level_2=0;
 		break;
 	}
-	if((((menustate&0x0f00)>>8)==1)&&(next==1))//选项2-2-1到2-2-2
+	if((level_2==1)&&(next==1))//菜单2-2选项1到2-2选项2
 	{
 		display_on=1;
 		next=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0200;
+		level_2=2;
 	}
-	if((((menustate&0x0f00)>>8)==1)&&(prev==1))//选项2-2-1到2-2-3
+	if((level_2==1)&&(prev==1))//菜单2-2选项1到2-2选项3
 	{
 		display_on=1;
 		prev=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0300;
+		level_2=3;
 	}
-	if((((menustate&0x0f00)>>8)==2)&&(next==1))//选项2-2-2到2-2-3
+	if((level_2==2)&&(next==1))//菜单2-2选项2到2-2选项3
 	{
 		display_on=1;
 		next=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0300;
+		level_2=3;
 	}
-	if((((menustate&0x0f00)>>8)==2)&&(prev==1))//选项2-2-2到2-2-1
+	if((level_2==2)&&(prev==1))//菜单2-2选项2到2-2选项1
 	{
 		display_on=1;
 		prev=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0100;
+		level_2=1;
 	}
-	if((((menustate&0x0f00)>>8)==3)&&(next==1))//选项2-2-3到2-2-1
+	if((level_2==3)&&(next==1))//菜单2-2选项3到2-2选项1
 	{
 		display_on=1;
 		next=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0100;
+		level_2=1;
 	}
-	if((((menustate&0x0f00)>>8)==3)&&(prev==1))//选项2-2-3到2-2-2
+	if((level_2==3)&&(prev==1))//菜单2-2选项3到2-2选项2
 	{
 		display_on=1;
 		prev=0;
-		menustate=menustate&0x00ff;
-		menustate=menustate|0x0200;
+		level_2=2;
 	}
-	if(((menustate&0x0f00)>>8)==1)//选项2-2-1
+	if(level_2==1)//菜单2-2选项1选中
 	{
 		if(display_on==1)
 		{
 			display_on=0;
 		}
 	}
-	if(((menustate&0x0f00)>>8)==2)//选项2-2-2
+	if(level_2==2)//菜单2-2选项2选中
 	{
 		if(display_on==1)
 		{
 			display_on=0;
 		}
 	}
-	if(((menustate&0x0f00)>>8)==3)//选项2-2-3
+	if(level_2==3)//菜单2-2选项3选中
+	{
+		if(display_on==1)
+		{
+			display_on=0;
+		}
+	}
+	}
+	return 0;
+}
+
+uint8_t Display_Menu_3_1()
+{
+	while(1)
+	{
+	if((level_3==1)&&(enter==1))//菜单3-1选项1确认
+	{
+		display_on=1;
+		enter=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==2)&&(enter==1))//菜单3-1选项2确认
+	{
+		display_on=1;
+		enter=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==3)&&(enter==1))//菜单3-1选项3确认
+	{
+		display_on=1;
+		enter=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==1)&&(exit==1))//菜单3-1返回
+	{
+		display_on=1;
+		exit=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==1)&&(next==1))//菜单3-1选项1到菜单3-1选项2
+	{
+		display_on=1;
+		next=0;
+		level_3=2;
+	}
+	if((level_3==1)&&(prev==1))//菜单3-1选项1到菜单3-1选项3
+	{
+		display_on=1;
+		prev=0;
+		level_3=3;
+	}
+	if((level_3==2)&&(next==1))//菜单3-1选项2到菜单3-1选项3
+	{
+		display_on=1;
+		next=0;
+		level_3=3;
+	}
+	if((level_3==2)&&(prev==1))//菜单3-1选项2到菜单3-1选项1
+	{
+		display_on=1;
+		prev=0;
+		level_3=1;
+	}
+	if((level_3==3)&&(next==1))//菜单3-1选项3到菜单3-1选项1
+	{
+		display_on=1;
+		next=0;
+		level_3=1;
+	}
+	if((level_3==3)&&(prev==1))//菜单3-1选项3到菜单3-1选项2
+	{
+		display_on=1;
+		prev=0;
+		level_3=2;
+	}
+	if(level_3==1)//菜单3-1选项1
+	{
+		if(display_on==1)
+		{
+			display_on=0;
+		}
+	}
+	if(level_3==2)//菜单3-1选项2
+	{
+		if(display_on==1)
+		{
+			display_on=0;
+			}
+		
+	}
+	if(level_3==3)//菜单3-1选项3
+	{
+		if(display_on==1)
+		{
+			display_on=0;
+		}
+	}
+	}
+	return 0;
+}
+
+uint8_t Display_Menu_3_2()
+{
+	while(1)
+	{
+	if((level_3==1)&&(enter==1))//菜单3-2选项1确认
+	{
+		display_on=1;
+		enter=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==2)&&(enter==1))//菜单3-2选项2确认
+	{
+		display_on=1;
+		enter=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==3)&&(enter==1))//菜单3-2选项3确认
+	{
+		display_on=1;
+		enter=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==1)&&(exit==1))//菜单3-2返回
+	{
+		display_on=1;
+		exit=0;
+		level_3=0;
+		break;
+	}
+	if((level_3==1)&&(next==1))//菜单3-2选项1到菜单3-2选项2
+	{
+		display_on=1;
+		next=0;
+		level_3=2;
+	}
+	if((level_3==1)&&(prev==1))//菜单3-2选项1到菜单3-2选项3
+	{
+		display_on=1;
+		prev=0;
+		level_3=3;
+	}
+	if((level_3==2)&&(next==1))//菜单3-2选项2到菜单3-2选项3
+	{
+		display_on=1;
+		next=0;
+		level_3=3;
+	}
+	if((level_3==2)&&(prev==1))//菜单3-2选项2到菜单3-2选项1
+	{
+		display_on=1;
+		prev=0;
+		level_3=1;
+	}
+	if((level_3==3)&&(next==1))//菜单3-2选项3到菜单3-2选项1
+	{
+		display_on=1;
+		next=0;
+		level_3=1;
+	}
+	if((level_3==3)&&(prev==1))//菜单3-2选项3到菜单3-2选项2
+	{
+		display_on=1;
+		prev=0;
+		level_3=2;
+	}
+	if(level_3==1)//菜单3-2选项1
+	{
+		if(display_on==1)
+		{
+			display_on=0;
+		}
+	}
+	if(level_3==2)//菜单3-2选项2
+	{
+		if(display_on==1)
+		{
+			display_on=0;
+			}
+		
+	}
+	if(level_3==3)//菜单3-2选项3
 	{
 		if(display_on==1)
 		{
